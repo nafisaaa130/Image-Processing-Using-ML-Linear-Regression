@@ -15,12 +15,13 @@ def createColorMosaic(inputfile, bayerFile, pattern):
     # print(img[3][4])
 
     height, width, channels = img.shape
-    print(img.shape) 
+    print(img.shape)
 
     #pixels are in GBR (reverse RGB) order
     #creating the bayer's pattern color mosaic
     for i in range(0, height-1, 2):
         for j in range(0, width-1, 2):
+            #in a 4x4 window
             if pattern == 'RGGB':
                 #red pixel
                 img[i][j][0] = 0
@@ -143,13 +144,27 @@ def createColorMosaic(inputfile, bayerFile, pattern):
 
     cv2.imwrite(bayerFile, img)
 
+def linearRegression(inputFile, bayerFile, outputFile, pattern):
+    if pattern not in ('RGGB', 'GBRG', 'GRBG', 'BGGR'):
+        print("Please a choose a pattern from the following list: RGGB, GBRG, GRBG, BGGR")
+        return
+    input_img=cv2.imread(inputfile, 1)
+    img=cv2.imread(bayerfile, 1)
+
+    # for pattern RGGB
+    for i in range(0, height-4, 2):
+        for j in range(0, width-4, 2):
+            
+    return
+
 if __name__ == "__main__":
     inputFile = '../images/lights.jpg'
     bayerFile = '../images/bayer.png'
+    outputFile = '../images/linear_regression.png'
     
     #choose a pattern from the following list:
     #[RGGB, GBRG, GRBG, BGGR]
-    pattern = 'BGGR'
+    pattern = 'RGGB'
 
     #creating color mosaic for the specified bayer's pattern
     createColorMosaic(inputFile, bayerFile, pattern)
