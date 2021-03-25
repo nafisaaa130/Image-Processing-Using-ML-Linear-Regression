@@ -470,8 +470,8 @@ def linearRegression(inputFile, bayerFile, pattern):
                 #blue pixels - on green pixels next to blue pixels
                 Xb_h_fin.append([img[i+2][j+1][0], img[i+2][j+3][0]])
 
-                #green pixels - on red pixel
-                Xg_4_fin.append([img[i+1][j+1][1], img[i+2][j][1], img[i+2][j+2][1], img[i+3][j+1][1]])
+                #green pixels - 6 data points
+                Xg_fin.append([img[i][j][1], img[i][j+2][1], img[i+2][j][1], img[i+2][j+2][1], img[i+4][j][1], img[i+4][j+2][1]])
 
                 #red pixels - on green pixels next to red pixels
                 Xr_h_fin.append([img[i+1][j][2], img[i+1][j+2][2]])
@@ -486,7 +486,7 @@ def linearRegression(inputFile, bayerFile, pattern):
                 Rb_v.append(input_img[i+1][j+1][0])
                 Rb_4.append(input_img[i+1][j+2][0])
                 Rb_h.append(input_img[i+2][j+2][0])
-                Rg_4.append(input_img[i+2][j+1][1])
+                Rg.append(input_img[i+2][j+1][1])
                 Rr_h.append(input_img[i+1][j+1][2])
                 Rr_4.append(input_img[i+2][j+1][2])
                 Rr_v.append(input_img[i+2][j+2][2])
@@ -506,10 +506,10 @@ def linearRegression(inputFile, bayerFile, pattern):
         Xb_h_pinv = np.linalg.pinv(Xb_h_np)
         A_blue_h = np.dot(Xb_h_pinv, Rb_h_np)
 
-        Xg_4_np = np.asarray(Xg_4_fin)
-        Rg_4_np = np.asarray(Rg_4).reshape(-1, 1)
-        Xg_4_pinv = np.linalg.pinv(Xg_4_np)
-        A_green_4 = np.dot(Xg_4_pinv, Rg_4_np)
+        Xg_np = np.asarray(Xg_fin)
+        Rg_np = np.asarray(Rg).reshape(-1, 1)
+        Xg_pinv = np.linalg.pinv(Xg_np)
+        A_green = np.dot(Xg_pinv, Rg_np)
 
         Xr_h_np = np.asarray(Xr_h_fin)
         Rr_h_np = np.asarray(Rr_h).reshape(-1, 1)
@@ -555,19 +555,19 @@ def linearRegression(inputFile, bayerFile, pattern):
                 
                 img[i+2][j+2][0] = int(R_blue_h[0][0])
 
-                #green pixels
-                Xg_4_temp = [img[i+1][j+1][1], img[i+2][j][1], img[i+2][j+2][1], img[i+3][j+1][1]]
+                #green pixels - 6 data points
+                Xg_4_temp = [img[i][j][1], img[i][j+2][1], img[i+2][j][1], img[i+2][j+2][1], img[i+4][j][1], img[i+4][j+2][1]]
                 Xg_4_temp_np = np.array(Xg_4_temp).reshape(-1, 1)
                 Xg_4_temp_T = np.transpose(Xg_4_temp_np)
-                R_green_4 = np.matmul(Xg_4_temp_T, A_green_4)
+                R_green_4 = np.matmul(Xg_4_temp_T, A_green)
                 
                 img[i+2][j+1][1] = int(R_green_4[0][0])
 
-                #green pixels
-                Xg_temp = [img[i][j+2][1], img[i+1][j+1][1], img[i+2][j+3][1], img[i+2][j+2][1]]
+                #green pixels - 6 data points
+                Xg_temp = [img[i][j+2][1], img[i+1][j+1][1], img[i+1][j+3][1], img[i+2][j+2][1], img[i+3][j+1][1], img[i+3][j+3][1]]
                 Xg_temp_np = np.array(Xg_temp).reshape(-1, 1)
                 Xg_temp_T = np.transpose(Xg_temp_np)
-                R_green = np.matmul(Xg_temp_T, A_green_4)
+                R_green = np.matmul(Xg_temp_T, A_green)
                 
                 img[i+1][j+2][1] = int(R_green[0][0])
 
