@@ -456,7 +456,7 @@ def linearRegression(inputFile, bayerFile, pattern):
                 R_blue_v = np.matmul(Xb_v_temp_T, A_blue_v)
 
                 img[i+2][j+1][2] = int(R_blue_v[0][0])
-
+    # condition takes care of the GREEN, BLUE, RED, GREEN Bayer's pattern
     elif pattern == 'GBRG':
         for i in range(0, height-4, 2):
             for j in range(0, width-4, 2):
@@ -594,7 +594,144 @@ def linearRegression(inputFile, bayerFile, pattern):
                 R_red_v = np.matmul(Xr_v_temp_T, A_red_v)
                 
                 img[i+2][j+2][2] = int(R_red_v[0][0])
+    # condition takes care of the GREEN, RED, BLUE, GREEN Bayer's pattern
+    else:
+        for i in range(0, height-4, 2):
+            for j in range(0, width-4, 2):
+                #openCV displays pixels as BGR (reverse order)
+                #blue pixels - on green pixels next to red pixels
+                Xb_v_fin.append([img[i][j+1][2], img[i+2][j+1][2]])
 
+                #blue pixels - on red pixels
+                Xb_4_fin.append([img[i][j+1][2], img[i][j+3][2], img[i+2][j+1][2], img[i+2][j+3][2]])
+
+                #blue pixels - on green pixels next to blue pixels
+                Xb_h_fin.append([img[i+2][j+1][2], img[i+2][j+3][2]])
+
+                #green pixels - 6 data points
+                Xg_fin.append([img[i][j][1], img[i][j+2][1], img[i+2][j][1], img[i+2][j+2][1], img[i+4][j][1], img[i+4][j+2][1]])
+
+                #red pixels - on green pixels next to red pixels
+                Xr_h_fin.append([img[i+1][j][0], img[i+1][j+2][0]])
+
+                #red pixels - on blue pixels
+                Xr_4_fin.append([img[i+1][j][0], img[i+1][j+2][0], img[i+3][j][0], img[i+3][j+2][0]])
+
+                #red pixels - on green pixels next to blue pixels
+                Xr_v_fin.append([img[i+1][j+2][0], img[i+3][j+2][0]])
+
+                #the true pixel values
+                Rb_v.append(input_img[i+1][j+1][2])
+                Rb_4.append(input_img[i+1][j+2][2])
+                Rb_h.append(input_img[i+2][j+2][2])
+                Rg.append(input_img[i+2][j+1][1])
+                Rr_h.append(input_img[i+1][j+1][0])
+                Rr_4.append(input_img[i+2][j+1][0])
+                Rr_v.append(input_img[i+2][j+2][0])
+
+        Xb_v_np = np.asarray(Xb_v_fin)
+        Rb_v_np = np.asarray(Rb_v).reshape(-1, 1)
+        Xb_v_pinv = np.linalg.pinv(Xb_v_np)
+        A_blue_v = np.dot(Xb_v_pinv, Rb_v_np)
+        
+        Xb_4_np = np.asarray(Xb_4_fin)
+        Rb_4_np = np.asarray(Rb_4).reshape(-1, 1)
+        Xb_4_pinv = np.linalg.pinv(Xb_4_np)
+        A_blue_4 = np.dot(Xb_4_pinv, Rb_4_np)
+
+        Xb_h_np = np.asarray(Xb_h_fin)
+        Rb_h_np = np.asarray(Rb_h).reshape(-1, 1)
+        Xb_h_pinv = np.linalg.pinv(Xb_h_np)
+        A_blue_h = np.dot(Xb_h_pinv, Rb_h_np)
+
+        Xg_np = np.asarray(Xg_fin)
+        Rg_np = np.asarray(Rg).reshape(-1, 1)
+        Xg_pinv = np.linalg.pinv(Xg_np)
+        A_green = np.dot(Xg_pinv, Rg_np)
+
+        Xr_h_np = np.asarray(Xr_h_fin)
+        Rr_h_np = np.asarray(Rr_h).reshape(-1, 1)
+        Xr_h_pinv = np.linalg.pinv(Xr_h_np)
+        A_red_h = np.dot(Xr_h_pinv, Rr_h_np)
+
+        Xr_4_np = np.asarray(Xr_4_fin)
+        Rr_4_np = np.asarray(Rr_4).reshape(-1, 1)
+        Xr_4_pinv = np.linalg.pinv(Xr_4_np)
+        A_red_4 = np.dot(Xr_4_pinv, Rr_4_np)
+
+        Xr_v_np = np.asarray(Xr_v_fin)
+        Rr_v_np = np.asarray(Rr_v).reshape(-1, 1)
+        Xr_v_pinv = np.linalg.pinv(Xr_v_np)
+        A_red_v = np.dot(Xr_v_pinv, Rr_v_np)
+
+
+        for i in range(0, height-4, 2):
+            for j in range(0, width-4, 2):
+                #openCV displays pixels as BGR (reverse order)
+
+                #blue pixels
+                Xb_v_temp = [img[i][j+1][2], img[i+2][j+1][2]]
+                Xb_v_temp_np = np.array(Xb_v_temp).reshape(-1, 1)
+                Xb_v_temp_T = np.transpose(Xb_v_temp_np)
+                R_blue_v = np.matmul(Xb_v_temp_T, A_blue_v)
+                
+                img[i+1][j+1][2] = int(R_blue_v[0][0])
+
+                #blue pixels
+                Xb_4_temp = [img[i][j+1][2], img[i][j+3][2], img[i+2][j+1][2], img[i+2][j+3][2]]
+                Xb_4_temp_np = np.array(Xb_4_temp).reshape(-1, 1)
+                Xb_4_temp_T = np.transpose(Xb_4_temp_np)
+                R_blue_4 = np.matmul(Xb_4_temp_T, A_blue_4)
+                
+                img[i+1][j+2][2] = int(R_blue_4[0][0])
+
+                #blue pixels
+                Xb_h_temp = [img[i+2][j+1][2], img[i+2][j+3][2]]
+                Xb_h_temp_np = np.array(Xb_h_temp).reshape(-1, 1)
+                Xb_h_temp_T = np.transpose(Xb_h_temp_np)
+                R_blue_h = np.matmul(Xb_h_temp_T, A_blue_h)
+                
+                img[i+2][j+2][2] = int(R_blue_h[0][0])
+
+                #green pixels - 6 data points
+                Xg_4_temp = [img[i][j][1], img[i][j+2][1], img[i+2][j][1], img[i+2][j+2][1], img[i+4][j][1], img[i+4][j+2][1]]
+                Xg_4_temp_np = np.array(Xg_4_temp).reshape(-1, 1)
+                Xg_4_temp_T = np.transpose(Xg_4_temp_np)
+                R_green_4 = np.matmul(Xg_4_temp_T, A_green)
+                
+                img[i+2][j+1][1] = int(R_green_4[0][0])
+
+                #green pixels - 6 data points
+                Xg_temp = [img[i][j+2][1], img[i+1][j+1][1], img[i+1][j+3][1], img[i+2][j+2][1], img[i+3][j+1][1], img[i+3][j+3][1]]
+                Xg_temp_np = np.array(Xg_temp).reshape(-1, 1)
+                Xg_temp_T = np.transpose(Xg_temp_np)
+                R_green = np.matmul(Xg_temp_T, A_green)
+                
+                img[i+1][j+2][1] = int(R_green[0][0])
+
+                #red pixels
+                Xr_h_temp = [img[i+1][j][0], img[i+1][j+2][0]]
+                Xr_h_temp_np = np.array(Xr_h_temp).reshape(-1, 1)
+                Xr_h_temp_T = np.transpose(Xr_h_temp_np)
+                R_red_h = np.matmul(Xr_h_temp_T, A_red_h)
+                
+                img[i+1][j+1][0] = int(R_red_h[0][0])
+
+                #red pixels
+                Xr_4_temp = [img[i+1][j][0], img[i+1][j+2][0], img[i+3][j][0], img[i+3][j+2][0]]
+                Xr_4_temp_np = np.array(Xr_4_temp).reshape(-1, 1)
+                Xr_4_temp_T = np.transpose(Xr_4_temp_np)
+                R_red_4 = np.matmul(Xr_4_temp_T, A_red_4)
+                
+                img[i+2][j+1][0] = int(R_red_4[0][0])
+
+                #red pixels
+                Xr_v_temp = [img[i+1][j+2][0], img[i+3][j+2][0]]
+                Xr_v_temp_np = np.array(Xr_v_temp).reshape(-1, 1)
+                Xr_v_temp_T = np.transpose(Xr_v_temp_np)
+                R_red_v = np.matmul(Xr_v_temp_T, A_red_v)
+                
+                img[i+2][j+2][0] = int(R_red_v[0][0])
     return img
 
 if __name__ == "__main__":
@@ -604,7 +741,7 @@ if __name__ == "__main__":
     
     #choose a pattern from the following list:
     #[RGGB, GBRG, GRBG, BGGR]
-    pattern = 'GBRG'
+    pattern = 'RGGB'
 
     #creating color mosaic for the specified bayer's pattern
     createColorMosaic(inputFile, bayerFile, pattern)
