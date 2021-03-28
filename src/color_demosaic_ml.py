@@ -316,6 +316,156 @@ def linearRegression(inputFile, bayerFile, pattern):
                 R_blue_v = np.matmul(Xb_v_temp_T, A_blue_v)
 
                 img[i+2][j+1][0] = int(R_blue_v[0][0])
+
+        end_width = width
+        if width%2 != 0:
+            end_width = width-1
+
+        #height is a even number, meaning the last row is a green, blue row
+        if height%2 == 0:
+            start_row = (height-6)+3
+            for i in range(start_row, height, 2):
+                for j in range(1, end_width-1, 2):
+                    if (i == height-1):
+                        # blue pixel
+                        #red value - 4 data points
+                        img[i][j][2] = img[i-1][j][2]
+                    
+                        #green value
+                        img[i][j][1] = img[i-1][j][1]
+                        
+                        # green pixel
+                        #red value
+                        img[i][j+1][2] = img[i-1][j+1][2]
+
+                        #blue value
+                        img[i][j+1][0] = img[i][j][0]
+                        continue
+                    
+                    # blue pixel
+                    #red value - 4 data points
+                    img[i][j][2] = img[i-1][j][2]
+                
+                    #green value
+                    img[i][j][1] = img[i-1][j][1]
+                    
+                    # green pixel
+                    #red value
+                    img[i][j+1][2] = img[i-1][j+1][2]
+
+                    #blue value
+                    img[i][j+1][0] = img[i][j][0]
+
+                    # #green pixel
+                    #red value
+                    img[i+1][j][2] = img[i+1][j-1][2]
+
+                    #blue value
+                    img[i+1][j][0] = img[i][j][0]
+
+                    # #red pixel
+                    #blue value
+                    img[i+1][j+1][0] = img[i][j+1][0]
+
+                    #green value
+                    img[i+1][j+1][1] = img[i+1][j][1]
+
+        #height is an odd number, meaning the last row is a red, green row
+        else:
+            start_row = (height-4)+2
+            for i in range(start_row, height, 2):
+                for j in range(1, end_width-1, 2):
+                    if (i == height-1):
+                        # blue pixel
+                        #red value - 4 data points
+                        img[i][j][2] = img[i-1][j][2]
+                    
+                        #green value
+                        img[i][j][1] = img[i-1][j][1]
+                        
+                        # green pixel
+                        #red value
+                        img[i][j+1][2] = img[i-1][j+1][2]
+
+                        #blue value
+                        img[i][j+1][0] = img[i][j][0]
+                        continue
+                    
+                    # blue pixel
+                    #red value - 4 data points
+                    img[i][j][2] = img[i-1][j][2]
+                
+                    #green value
+                    img[i][j][1] = img[i-1][j][1]
+                    
+                    # green pixel
+                    #red value
+                    img[i][j+1][2] = img[i-1][j+1][2]
+
+                    #blue value
+                    img[i][j+1][0] = img[i][j][0]
+
+                    # #green pixel
+                    #red value
+                    img[i+1][j][2] = img[i+1][j-1][2]
+
+                    #blue value
+                    img[i+1][j][0] = img[i][j][0]
+
+                    # #red pixel
+                    #blue value
+                    img[i+1][j+1][0] = img[i][j+1][0]
+
+                    #green value
+                    img[i+1][j+1][1] = img[i+1][j][1]
+    
+        for i in range(1, height-1, 2):
+            for j in range(end_width-3, width-1, 2):
+                if (i == width-1):
+                    # blue pixel
+                    #red value - 4 data points
+                    img[i][j][2] = img[i-1][j][2]
+                
+                    #green value
+                    img[i][j][1] = img[i-1][j][1]
+                    
+                    # green pixel
+                    #red value
+                    img[i][j+1][2] = img[i-1][j+1][2]
+
+                    #blue value
+                    img[i][j+1][0] = img[i][j][0]
+                    continue
+                
+                # blue pixel
+                #red value - 4 data points
+                img[i][j][2] = img[i][j-1][2]
+            
+                #green value
+                img[i][j][1] = img[i][j-1][1]
+                
+                # green pixel
+                #red value
+                img[i][j+1][2] = img[i-1][j+1][2]
+
+                #blue value
+                img[i][j+1][0] = img[i][j][0]
+
+                # #green pixel
+                #red value
+                img[i+1][j][2] = img[i+1][j-1][2]
+
+                #blue value
+                img[i+1][j][0] = img[i][j][0]
+
+                # #red pixel
+                #blue value
+                img[i+1][j+1][0] = img[i+1][j][0]
+
+                #green value
+                img[i+1][j+1][1] = img[i+1][j][1]
+
+
     # condition takes care of the BLUE, GREEN, GREEN, RED Bayer's pattern
     elif pattern == 'BGGR':
         for i in range(0, height-4, 2):
@@ -433,29 +583,29 @@ def linearRegression(inputFile, bayerFile, pattern):
 
                 img[i+1][j+1][0] = int(R_red_b[0][0])
 
-                #green pixels - on blue pixels
-                Xg_4_temp = [img[i][j+1][1], img[i+1][j][1], img[i+1][j+2][1], img[i+2][j+1][1]]
-                Xg_4_temp_np = np.array(Xg_4_temp).reshape(-1, 1)
-                Xg_4_temp_T = np.transpose(Xg_4_temp_np)
-                R_green_4 = np.matmul(Xg_4_temp_T, A_green_4)
+                # #green pixels - on blue pixels
+                # Xg_4_temp = [img[i][j+1][1], img[i+1][j][1], img[i+1][j+2][1], img[i+2][j+1][1]]
+                # Xg_4_temp_np = np.array(Xg_4_temp).reshape(-1, 1)
+                # Xg_4_temp_T = np.transpose(Xg_4_temp_np)
+                # R_green_4 = np.matmul(Xg_4_temp_T, A_green_4)
 
-                img[i+1][j+1][1] = int(R_green_4[0][0])
+                # img[i+1][j+1][1] = int(R_green_4[0][0])
 
-                #red pixels - on green pixels next to red pixels
-                Xb_h_temp = [img[i+1][j+1][2], img[i+1][j+3][2]]
-                Xb_h_temp_np = np.array(Xb_h_temp).reshape(-1, 1)
-                Xb_h_temp_T = np.transpose(Xb_h_temp_np)
-                R_blue_h = np.matmul(Xb_h_temp_T, A_blue_h)
+                # #red pixels - on green pixels next to red pixels
+                # Xb_h_temp = [img[i+1][j+1][2], img[i+1][j+3][2]]
+                # Xb_h_temp_np = np.array(Xb_h_temp).reshape(-1, 1)
+                # Xb_h_temp_T = np.transpose(Xb_h_temp_np)
+                # R_blue_h = np.matmul(Xb_h_temp_T, A_blue_h)
 
-                img[i+1][j+2][2] = int(R_blue_h[0][0])
+                # img[i+1][j+2][2] = int(R_blue_h[0][0])
 
-                #red pixels - on green pixels next to blue pixels
-                Xb_v_temp = [img[i+1][j+1][2], img[i+3][j+1][2]]
-                Xb_v_temp_np = np.array(Xb_v_temp).reshape(-1, 1)
-                Xb_v_temp_T = np.transpose(Xb_v_temp_np)
-                R_blue_v = np.matmul(Xb_v_temp_T, A_blue_v)
+                # #red pixels - on green pixels next to blue pixels
+                # Xb_v_temp = [img[i+1][j+1][2], img[i+3][j+1][2]]
+                # Xb_v_temp_np = np.array(Xb_v_temp).reshape(-1, 1)
+                # Xb_v_temp_T = np.transpose(Xb_v_temp_np)
+                # R_blue_v = np.matmul(Xb_v_temp_T, A_blue_v)
 
-                img[i+2][j+1][2] = int(R_blue_v[0][0])
+                # img[i+2][j+1][2] = int(R_blue_v[0][0])
     # condition takes care of the GREEN, BLUE, RED, GREEN Bayer's pattern
     elif pattern == 'GBRG':
         for i in range(0, height-4, 2):
@@ -669,7 +819,7 @@ def linearRegression(inputFile, bayerFile, pattern):
             for j in range(0, width-4, 2):
                 #openCV displays pixels as BGR (reverse order)
 
-                #blue pixels
+                #red pixels
                 Xb_v_temp = [img[i][j+1][2], img[i+2][j+1][2]]
                 Xb_v_temp_np = np.array(Xb_v_temp).reshape(-1, 1)
                 Xb_v_temp_T = np.transpose(Xb_v_temp_np)
@@ -677,7 +827,7 @@ def linearRegression(inputFile, bayerFile, pattern):
                 
                 img[i+1][j+1][2] = int(R_blue_v[0][0])
 
-                #blue pixels
+                #red pixels
                 Xb_4_temp = [img[i][j+1][2], img[i][j+3][2], img[i+2][j+1][2], img[i+2][j+3][2]]
                 Xb_4_temp_np = np.array(Xb_4_temp).reshape(-1, 1)
                 Xb_4_temp_T = np.transpose(Xb_4_temp_np)
@@ -685,7 +835,7 @@ def linearRegression(inputFile, bayerFile, pattern):
                 
                 img[i+1][j+2][2] = int(R_blue_4[0][0])
 
-                #blue pixels
+                #red pixels
                 Xb_h_temp = [img[i+2][j+1][2], img[i+2][j+3][2]]
                 Xb_h_temp_np = np.array(Xb_h_temp).reshape(-1, 1)
                 Xb_h_temp_T = np.transpose(Xb_h_temp_np)
@@ -701,7 +851,7 @@ def linearRegression(inputFile, bayerFile, pattern):
                 
                 img[i+2][j+1][1] = int(R_green_4[0][0])
 
-                #green pixels - 6 data points
+                #green - 6 data points
                 Xg_temp = [img[i][j+2][1], img[i+1][j+1][1], img[i+1][j+3][1], img[i+2][j+2][1], img[i+3][j+1][1], img[i+3][j+3][1]]
                 Xg_temp_np = np.array(Xg_temp).reshape(-1, 1)
                 Xg_temp_T = np.transpose(Xg_temp_np)
@@ -709,7 +859,7 @@ def linearRegression(inputFile, bayerFile, pattern):
                 
                 img[i+1][j+2][1] = int(R_green[0][0])
 
-                #red pixels
+                #blue pixels
                 Xr_h_temp = [img[i+1][j][0], img[i+1][j+2][0]]
                 Xr_h_temp_np = np.array(Xr_h_temp).reshape(-1, 1)
                 Xr_h_temp_T = np.transpose(Xr_h_temp_np)
@@ -717,7 +867,7 @@ def linearRegression(inputFile, bayerFile, pattern):
                 
                 img[i+1][j+1][0] = int(R_red_h[0][0])
 
-                #red pixels
+                #blue pixels
                 Xr_4_temp = [img[i+1][j][0], img[i+1][j+2][0], img[i+3][j][0], img[i+3][j+2][0]]
                 Xr_4_temp_np = np.array(Xr_4_temp).reshape(-1, 1)
                 Xr_4_temp_T = np.transpose(Xr_4_temp_np)
@@ -725,7 +875,7 @@ def linearRegression(inputFile, bayerFile, pattern):
                 
                 img[i+2][j+1][0] = int(R_red_4[0][0])
 
-                #red pixels
+                #blue pixels
                 Xr_v_temp = [img[i+1][j+2][0], img[i+3][j+2][0]]
                 Xr_v_temp_np = np.array(Xr_v_temp).reshape(-1, 1)
                 Xr_v_temp_T = np.transpose(Xr_v_temp_np)
@@ -735,7 +885,8 @@ def linearRegression(inputFile, bayerFile, pattern):
     return img
 
 if __name__ == "__main__":
-    inputFile = '../images/lights.jpg'
+    # inputFile = '../images/lights.jpg'
+    inputFile = '../images/lion.png'
     bayerFile = '../images/bayer.png'
     outputFile = '../images/linear_regression.png'
     
