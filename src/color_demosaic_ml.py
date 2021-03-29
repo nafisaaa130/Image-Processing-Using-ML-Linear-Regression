@@ -317,6 +317,40 @@ def linearRegression(inputFile, bayerFile, pattern):
 
                 img[i+2][j+1][0] = int(R_blue_v[0][0])
 
+        red = 0
+        green = 1
+        img[0][0][0] = img[1][1][0]
+        img[0][0][1] = img[0][1][1]
+
+        # first column
+        for i in range(1, height):
+            if green == 1:
+                img[i][0][0] = img[i][1][0]
+                img[i][0][2] = img[i-1][0][2]
+                green = 0
+                red = 1
+            else:
+                img[i][0][0] = img[i][1][0]
+                img[i][0][1] = img[i][1][1]
+                green = 1
+                red = 0
+
+        #first row
+        for i in range(1, width):
+            if green == 1:
+                img[0][i][0] = img[1][i][0]
+                print("blue", img[0][i][0])
+                img[0][i][1] = img[1][i][1]
+                print("green", img[0][i][1])
+                green = 0
+                red = 1
+            else:
+                img[0][i][0] = img[1][i][0]
+                img[0][i][2] = img[0][i-1][2]
+                green = 1
+                red = 0
+                
+
         end_width = width
         if width%2 != 0:
             end_width = width-1
@@ -464,7 +498,6 @@ def linearRegression(inputFile, bayerFile, pattern):
 
                 #green value
                 img[i+1][j+1][1] = img[i+1][j][1]
-
 
     # condition takes care of the BLUE, GREEN, GREEN, RED Bayer's pattern
     elif pattern == 'BGGR':
