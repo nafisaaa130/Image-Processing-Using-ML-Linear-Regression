@@ -249,6 +249,7 @@ def linearRegression(inputFile, bayerFile, pattern):
         Xb_v_pinv = np.linalg.pinv(Xb_v_np)
         A_blue_v = np.dot(Xb_v_pinv, Rb_v_np)
 
+        # calculate the estimated values, using the coefficient matrices
         for i in range(0, height-4, 2):
             for j in range(0, width-4, 2):
                 #openCV displays pixels as BGR (reverse order)
@@ -317,187 +318,68 @@ def linearRegression(inputFile, bayerFile, pattern):
 
                 img[i+2][j+1][0] = int(R_blue_v[0][0])
 
-        red = 0
-        green = 1
-        img[0][0][0] = img[1][1][0]
-        img[0][0][1] = img[0][1][1]
+        img[0][0][0], img[0][0][1] = img[1][1][0], img[0][1][1]
 
         # first column
         for i in range(1, height):
-            if green == 1:
-                img[i][0][0] = img[i][1][0]
-                img[i][0][2] = img[i-1][0][2]
-                green = 0
-                red = 1
+            if i%2 == 1:
+                img[i][0][0], img[i][0][2] = img[i][1][0], img[i-1][0][2]
             else:
-                img[i][0][0] = img[i][1][0]
-                img[i][0][1] = img[i][1][1]
-                green = 1
-                red = 0
+                img[i][0][0], img[i][0][1] = img[i][1][0], img[i][1][1]
 
         #first row
         for i in range(1, width):
-            if green == 1:
-                img[0][i][0] = img[1][i][0]
-                print("blue", img[0][i][0])
-                img[0][i][1] = img[1][i][1]
-                print("green", img[0][i][1])
-                green = 0
-                red = 1
+            if i%2 == 1:
+                img[0][i][0], img[0][i][2] = img[1][i][0], img[0][i-1][2]
             else:
-                img[0][i][0] = img[1][i][0]
-                img[0][i][2] = img[0][i-1][2]
-                green = 1
-                red = 0
+                img[0][i][0], img[0][i][1] = img[1][i][0], img[1][i][1]
                 
-
+        # determines the number of extra columns remaining at the end of the image
         end_width = width
         if width%2 != 0:
             end_width = width-1
 
-        #height is a even number, meaning the last row is a green, blue row
+        #regardless if height is an even or odd amount, want to start calculating at a blue, green row
         if height%2 == 0:
             start_row = (height-6)+3
-            for i in range(start_row, height, 2):
-                for j in range(1, end_width-1, 2):
-                    if (i == height-1):
-                        # blue pixel
-                        #red value - 4 data points
-                        img[i][j][2] = img[i-1][j][2]
-                    
-                        #green value
-                        img[i][j][1] = img[i-1][j][1]
-                        
-                        # green pixel
-                        #red value
-                        img[i][j+1][2] = img[i-1][j+1][2]
-
-                        #blue value
-                        img[i][j+1][0] = img[i][j][0]
-                        continue
-                    
-                    # blue pixel
-                    #red value - 4 data points
-                    img[i][j][2] = img[i-1][j][2]
-                
-                    #green value
-                    img[i][j][1] = img[i-1][j][1]
-                    
-                    # green pixel
-                    #red value
-                    img[i][j+1][2] = img[i-1][j+1][2]
-
-                    #blue value
-                    img[i][j+1][0] = img[i][j][0]
-
-                    # #green pixel
-                    #red value
-                    img[i+1][j][2] = img[i+1][j-1][2]
-
-                    #blue value
-                    img[i+1][j][0] = img[i][j][0]
-
-                    # #red pixel
-                    #blue value
-                    img[i+1][j+1][0] = img[i][j+1][0]
-
-                    #green value
-                    img[i+1][j+1][1] = img[i+1][j][1]
-
-        #height is an odd number, meaning the last row is a red, green row
         else:
             start_row = (height-4)+2
-            for i in range(start_row, height, 2):
-                for j in range(1, end_width-1, 2):
-                    if (i == height-1):
-                        # blue pixel
-                        #red value - 4 data points
-                        img[i][j][2] = img[i-1][j][2]
-                    
-                        #green value
-                        img[i][j][1] = img[i-1][j][1]
-                        
-                        # green pixel
-                        #red value
-                        img[i][j+1][2] = img[i-1][j+1][2]
 
-                        #blue value
-                        img[i][j+1][0] = img[i][j][0]
-                        continue
-                    
-                    # blue pixel
-                    #red value - 4 data points
-                    img[i][j][2] = img[i-1][j][2]
-                
-                    #green value
-                    img[i][j][1] = img[i-1][j][1]
-                    
-                    # green pixel
-                    #red value
-                    img[i][j+1][2] = img[i-1][j+1][2]
-
-                    #blue value
-                    img[i][j+1][0] = img[i][j][0]
-
-                    # #green pixel
-                    #red value
-                    img[i+1][j][2] = img[i+1][j-1][2]
-
-                    #blue value
-                    img[i+1][j][0] = img[i][j][0]
-
-                    # #red pixel
-                    #blue value
-                    img[i+1][j+1][0] = img[i][j+1][0]
-
-                    #green value
-                    img[i+1][j+1][1] = img[i+1][j][1]
-    
-        for i in range(1, height-1, 2):
-            for j in range(end_width-3, width-1, 2):
-                if (i == width-1):
-                    # blue pixel
-                    #red value - 4 data points
-                    img[i][j][2] = img[i-1][j][2]
-                
-                    #green value
-                    img[i][j][1] = img[i-1][j][1]
-                    
-                    # green pixel
-                    #red value
-                    img[i][j+1][2] = img[i-1][j+1][2]
-
-                    #blue value
-                    img[i][j+1][0] = img[i][j][0]
-                    continue
-                
+        # last few rows
+        for i in range(start_row, height):
+            for j in range(1, end_width-1, 2):
                 # blue pixel
-                #red value - 4 data points
-                img[i][j][2] = img[i][j-1][2]
-            
-                #green value
-                img[i][j][1] = img[i][j-1][1]
-                
-                # green pixel
-                #red value
-                img[i][j+1][2] = img[i-1][j+1][2]
+                if i%2==1:
+                    #blue pixel - red and green red values
+                    img[i][j][2], img[i][j][1] = img[i-1][j+1][2], img[i][j-1][1]
 
-                #blue value
-                img[i][j+1][0] = img[i][j][0]
+                    # green pixel - red and blue values
+                    img[i][j+1][2], img[i][j+1][0] = img[i-1][j+1][2], img[i][j][0]
 
-                # #green pixel
-                #red value
-                img[i+1][j][2] = img[i+1][j-1][2]
+                else:
+                    #green pixel - red and blue values
+                    img[i][j][2], img[i][j][0] = img[i][j-1][2], img[i-1][j][0]
 
-                #blue value
-                img[i+1][j][0] = img[i][j][0]
+                    # #red pixel - blue and green values
+                    img[i][j+1][0], img[i][j+1][1] = img[i-1][j+1][0], img[i][j][1]
+    
+        # last few columns
+        for j in range(end_width-3, width):
+            for i in range(1, height-1, 2):
+                if j%2 == 1:
+                    # blue pixel - red and green values
+                    img[i][j][2], img[i][j][1] = img[i][j-1][2], img[i][j-1][1]
+                    
+                    # #green pixel - red and blue values
+                    img[i+1][j][2], img[i+1][j][0] = img[i+1][j-1][2], img[i][j][0]
 
-                # #red pixel
-                #blue value
-                img[i+1][j+1][0] = img[i+1][j][0]
+                else:
+                    # green pixel - red and blue values
+                    img[i][j][2], img[i][j][0] = img[i-1][j][2], img[i][j-1][0]
 
-                #green value
-                img[i+1][j+1][1] = img[i+1][j][1]
+                    # #red pixel - blue and green values
+                    #blue value
+                    img[i+1][j][0], img[i+1][j][1] = img[i+1][j-1][0], img[i+1][j-1][1]
 
     # condition takes care of the BLUE, GREEN, GREEN, RED Bayer's pattern
     elif pattern == 'BGGR':
