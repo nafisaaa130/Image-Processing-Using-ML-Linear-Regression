@@ -498,29 +498,92 @@ def linearRegression(inputFile, bayerFile, pattern):
 
                 img[i+1][j+1][0] = int(R_red_b[0][0])
 
-                # #green pixels - on blue pixels
-                # Xg_4_temp = [img[i][j+1][1], img[i+1][j][1], img[i+1][j+2][1], img[i+2][j+1][1]]
-                # Xg_4_temp_np = np.array(Xg_4_temp).reshape(-1, 1)
-                # Xg_4_temp_T = np.transpose(Xg_4_temp_np)
-                # R_green_4 = np.matmul(Xg_4_temp_T, A_green_4)
+                #green pixels - on blue pixels
+                Xg_4_temp = [img[i][j+1][1], img[i+1][j][1], img[i+1][j+2][1], img[i+2][j+1][1]]
+                Xg_4_temp_np = np.array(Xg_4_temp).reshape(-1, 1)
+                Xg_4_temp_T = np.transpose(Xg_4_temp_np)
+                R_green_4 = np.matmul(Xg_4_temp_T, A_green_4)
 
-                # img[i+1][j+1][1] = int(R_green_4[0][0])
+                img[i+1][j+1][1] = int(R_green_4[0][0])
 
-                # #red pixels - on green pixels next to red pixels
-                # Xb_h_temp = [img[i+1][j+1][2], img[i+1][j+3][2]]
-                # Xb_h_temp_np = np.array(Xb_h_temp).reshape(-1, 1)
-                # Xb_h_temp_T = np.transpose(Xb_h_temp_np)
-                # R_blue_h = np.matmul(Xb_h_temp_T, A_blue_h)
+                #red pixels - on green pixels next to red pixels
+                Xb_h_temp = [img[i+1][j+1][2], img[i+1][j+3][2]]
+                Xb_h_temp_np = np.array(Xb_h_temp).reshape(-1, 1)
+                Xb_h_temp_T = np.transpose(Xb_h_temp_np)
+                R_blue_h = np.matmul(Xb_h_temp_T, A_blue_h)
 
-                # img[i+1][j+2][2] = int(R_blue_h[0][0])
+                img[i+1][j+2][2] = int(R_blue_h[0][0])
 
-                # #red pixels - on green pixels next to blue pixels
-                # Xb_v_temp = [img[i+1][j+1][2], img[i+3][j+1][2]]
-                # Xb_v_temp_np = np.array(Xb_v_temp).reshape(-1, 1)
-                # Xb_v_temp_T = np.transpose(Xb_v_temp_np)
-                # R_blue_v = np.matmul(Xb_v_temp_T, A_blue_v)
+                #red pixels - on green pixels next to blue pixels
+                Xb_v_temp = [img[i+1][j+1][2], img[i+3][j+1][2]]
+                Xb_v_temp_np = np.array(Xb_v_temp).reshape(-1, 1)
+                Xb_v_temp_T = np.transpose(Xb_v_temp_np)
+                R_blue_v = np.matmul(Xb_v_temp_T, A_blue_v)
 
-                # img[i+2][j+1][2] = int(R_blue_v[0][0])
+                img[i+2][j+1][2] = int(R_blue_v[0][0])
+
+
+        img[0][0][2], img[0][0][1] = img[1][1][2], img[0][1][1]
+
+        # first column
+        for i in range(1, height):
+            if i%2 == 1:
+                img[i][0][0], img[i][0][2] = img[i][1][0], img[i-1][0][2]
+            else:
+                img[i][0][2], img[i][0][1] = img[i][1][2], img[i][1][1]
+
+        #first row
+        for i in range(1, width):
+            if i%2 == 1:
+                img[0][i][0], img[0][i][2] = img[1][i][0], img[0][i-1][2]
+            else:
+                img[0][i][2], img[0][i][1] = img[1][i][2], img[1][i][1]
+                
+        # determines the number of extra columns remaining at the end of the image
+        end_width = width
+        if width%2 != 0:
+            end_width = width-1
+
+        #regardless if height is an even or odd amount, want to start calculating at a blue, green row
+        if height%2 == 0:
+            start_row = (height-6)+3
+        else:
+            start_row = (height-4)+2
+
+        # last few rows
+        for i in range(start_row, height):
+            for j in range(1, end_width-1, 2):
+                # blue pixel
+                if i%2==1:
+                    #red pixel - blue and green red values
+                    img[i][j][0], img[i][j][1] = img[i-1][j+1][0], img[i][j-1][1]
+
+                    # green pixel - red and blue values
+                    img[i][j+1][2], img[i][j+1][0] = img[i-1][j+1][2], img[i][j][0]
+
+                else:
+                    #green pixel - red and blue values
+                    img[i][j][2], img[i][j][0] = img[i][j-1][2], img[i-1][j][0]
+
+                    # blue pixel - red and green values
+                    img[i][j+1][2], img[i][j+1][1] = img[i-1][j+1][2], img[i][j][1]
+    
+        # last few columns
+        for j in range(end_width-3, width):
+            for i in range(1, height-1, 2):
+                if j%2 == 1:
+                    # red pixel - blue and green values
+                    img[i][j][0], img[i][j][1] = img[i][j-1][0], img[i][j-1][1]
+                    
+                    # #green pixel - red and blue values
+                    img[i+1][j][2], img[i+1][j][0] = img[i+1][j-1][2], img[i][j][0]
+
+                else:
+                    # green pixel - red and blue values
+                    img[i][j][2], img[i][j][0] = img[i-1][j][2], img[i][j-1][0]
+
+                    #blue pixel - red and green values
+                    img[i+1][j][2], img[i+1][j][1] = img[i+1][j-1][2], img[i+1][j-1][1]
     # condition takes care of the GREEN, BLUE, RED, GREEN Bayer's pattern
     elif pattern == 'GBRG':
         for i in range(0, height-4, 2):
@@ -659,6 +722,66 @@ def linearRegression(inputFile, bayerFile, pattern):
                 R_red_v = np.matmul(Xr_v_temp_T, A_red_v)
                 
                 img[i+2][j+2][2] = int(R_red_v[0][0])
+
+        img[0][0][0], img[0][0][2] = img[1][1][0], img[0][1][2]
+
+        # first column
+        for i in range(1, height):
+            if i%2 == 1:
+                img[i][0][0], img[i][0][1] = img[i][1][0], img[i][1][1]
+            else:
+                img[i][0][0], img[i][0][2] = img[i][1][0], img[i-1][0][2]
+
+        #first row
+        for i in range(1, width):
+            if i%2 == 1:
+                img[0][i][2], img[0][i][1] = img[1][i][2], img[1][i][1]
+            else:
+                img[0][i][0], img[0][i][2] = img[1][i][0], img[0][i-1][2]
+                
+        # determines the number of extra columns remaining at the end of the image
+        end_width = width
+        if width%2 != 0:
+            end_width = width-1
+
+        #regardless if height is an even or odd amount, want to start calculating at a blue, green row
+        if height%2 == 0:
+            start_row = (height-6)+3
+        else:
+            start_row = (height-4)+2
+
+        # last few rows
+        for i in range(start_row, height):
+            for j in range(1, end_width-1, 2):
+                # blue pixel
+                if i%2==1:
+                   #green pixel - red and blue values
+                    img[i][j][2], img[i][j][0] = img[i][j-1][2], img[i-1][j][0]
+
+                    # #red pixel - blue and green values
+                    img[i][j+1][0], img[i][j+1][1] = img[i-1][j+1][0], img[i][j][1]
+                else:
+                     #blue pixel - red and green red values
+                    img[i][j][2], img[i][j][1] = img[i-1][j+1][2], img[i][j-1][1]
+
+                    # green pixel - red and blue values
+                    img[i][j+1][2], img[i][j+1][0] = img[i-1][j+1][2], img[i][j][0]
+    
+        # last few columns
+        for j in range(end_width-3, width):
+            for i in range(1, height-1, 2):
+                if j%2 == 1:
+                    # #green pixel - red and blue values
+                    img[i][j][2], img[i][j][0] = img[i][j-1][2], img[i-1][j][0]
+                    # blue pixel - red and green values
+                    img[i+1][j][2], img[i+1][j][1] = img[i+1][j-1][2], img[i+1][j-1][1]
+
+                else:
+                    # #red pixel - blue and green values
+                    img[i][j][0], img[i][j][1] = img[i][j-1][0], img[i][j-1][1]
+                    # green pixel - red and blue values
+                    img[i+1][j][2], img[i+1][j][0] = img[i][j][2], img[i+1][j-1][0]
+
     # condition takes care of the GREEN, RED, BLUE, GREEN Bayer's pattern
     else:
         for i in range(0, height-4, 2):
@@ -797,17 +920,85 @@ def linearRegression(inputFile, bayerFile, pattern):
                 R_red_v = np.matmul(Xr_v_temp_T, A_red_v)
                 
                 img[i+2][j+2][0] = int(R_red_v[0][0])
+
+        img[0][0][0], img[0][0][2] = img[1][1][0], img[0][1][2]
+
+        # first column
+        for i in range(1, height):
+            if i%2 == 1:
+                img[i][0][2], img[i][0][1] = img[i][1][2], img[i][1][1]
+            else:
+                img[i][0][0], img[i][0][2] = img[i][1][0], img[i-1][0][2]
+
+        #first row
+        for i in range(1, width):
+            if i%2 == 1:
+                img[0][i][0], img[0][i][1] = img[1][i][0], img[1][i][1]
+            else:
+                img[0][i][0], img[0][i][2] = img[1][i][0], img[0][i-1][2]
+                
+        # determines the number of extra columns remaining at the end of the image
+        end_width = width
+        if width%2 != 0:
+            end_width = width-1
+
+        #regardless if height is an even or odd amount, want to start calculating at a blue, green row
+        if height%2 == 0:
+            start_row = (height-6)+3
+        else:
+            start_row = (height-4)+2
+
+        # last few rows
+        for i in range(start_row, height):
+            for j in range(1, end_width-1, 2):
+                # blue pixel
+                if i%2==1:
+                   #green pixel - red and blue values
+                    img[i][j][2], img[i][j][0] = img[i][j-1][2], img[i-1][j][0]
+                    # blue pixel - red and green values
+                    img[i][j+1][2], img[i][j+1][1] = img[i-1][j+1][2], img[i][j][1]
+
+                else:
+                    #red pixel - blue and green red values
+                    img[i][j][0], img[i][j][1] = img[i-1][j+1][0], img[i][j-1][1]
+                    # green pixel - red and blue values
+                    img[i][j+1][2], img[i][j+1][0] = img[i-1][j+1][2], img[i][j][0]
+    
+        first_1 = 2
+        first_2 = 0
+        bottom_1 = 0
+        bottom_2 = 1
+        first2_1 = 2
+        first2_2 = 1
+        bottom2_1 = 2
+        bottom2_2 = 0
+
+        # last few columns
+        for j in range(end_width-3, width):
+            for i in range(1, height-1, 2):
+                if j%2 == 1:
+                    # green pixel - red and blue values
+                    img[i][j][first_1], img[i][j][first_2] = img[i-1][j][first_1], img[i][j-1][first_2]
+                    # #red pixel - blue and green values
+                    img[i+1][j][bottom_1], img[i+1][j][bottom_2] = img[i+1][j-1][bottom_1], img[i+1][j-1][bottom_2]
+
+                else:
+                    # blue pixel - red and green values
+                    img[i][j][first2_1], img[i][j][first2_2] = img[i][j-1][first2_1], img[i][j-1][first2_2]
+                    # #green pixel - red and blue values
+                    img[i+1][j][bottom2_1], img[i+1][j][bottom2_2] = img[i+1][j-1][bottom2_1], img[i][j][bottom2_2]
+
     return img
 
 if __name__ == "__main__":
-    # inputFile = '../images/lights.jpg'
-    inputFile = '../images/lion.png'
+    inputFile = '../images/lights.jpg'
+    # inputFile = '../images/lion.png'
     bayerFile = '../images/bayer.png'
     outputFile = '../images/linear_regression.png'
     
     #choose a pattern from the following list:
     #[RGGB, GBRG, GRBG, BGGR]
-    pattern = 'RGGB'
+    pattern = 'GRBG'
 
     #creating color mosaic for the specified bayer's pattern
     createColorMosaic(inputFile, bayerFile, pattern)
