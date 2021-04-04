@@ -963,39 +963,30 @@ def linearRegression(inputFile, bayerFile, pattern):
                     img[i][j][0], img[i][j][1] = img[i-1][j+1][0], img[i][j-1][1]
                     # green pixel - red and blue values
                     img[i][j+1][2], img[i][j+1][0] = img[i-1][j+1][2], img[i][j][0]
-    
-        first_1 = 2
-        first_2 = 0
-        bottom_1 = 0
-        bottom_2 = 1
-        first2_1 = 2
-        first2_2 = 1
-        bottom2_1 = 2
-        bottom2_2 = 0
 
         # last few columns
         for j in range(end_width-3, width):
             for i in range(1, height-1, 2):
                 if j%2 == 1:
                     # green pixel - red and blue values
-                    img[i][j][first_1], img[i][j][first_2] = img[i-1][j][first_1], img[i][j-1][first_2]
+                    img[i][j][2], img[i][j][0] = img[i-1][j][2], img[i][j-1][0]
                     # #red pixel - blue and green values
-                    img[i+1][j][bottom_1], img[i+1][j][bottom_2] = img[i+1][j-1][bottom_1], img[i+1][j-1][bottom_2]
+                    img[i+1][j][0], img[i+1][j][1] = img[i+1][j-1][0], img[i+1][j-1][1]
 
                 else:
                     # blue pixel - red and green values
-                    img[i][j][first2_1], img[i][j][first2_2] = img[i][j-1][first2_1], img[i][j-1][first2_2]
+                    img[i][j][2], img[i][j][1] = img[i][j-1][2], img[i][j-1][1]
                     # #green pixel - red and blue values
-                    img[i+1][j][bottom2_1], img[i+1][j][bottom2_2] = img[i+1][j-1][bottom2_1], img[i][j][bottom2_2]
+                    img[i+1][j][2], img[i+1][j][0] = img[i+1][j-1][2], img[i][j][0]
 
     return img
 
 if __name__ == "__main__":
-    inputFile = '../images/lights.jpg'
-    # inputFile = '../images/lion.png'
+    #inputFile = '../images/lights.jpg'
+    inputFile = '../images/lion.png'
     bayerFile = '../images/bayer.png'
     outputFile = '../images/linear_regression.png'
-    
+
     #choose a pattern from the following list:
     #[RGGB, GBRG, GRBG, BGGR]
     pattern = 'GRBG'
